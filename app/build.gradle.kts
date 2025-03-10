@@ -57,6 +57,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
     // Ajoutez la dépendance pour le BoM de Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
 
@@ -65,4 +66,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-storage")
+
+    implementation("androidx.activity:activity-compose:1.9.0")
+
 }
