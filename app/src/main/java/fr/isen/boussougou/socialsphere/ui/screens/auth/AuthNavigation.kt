@@ -1,12 +1,22 @@
 package fr.isen.boussougou.socialsphere.ui.screens.auth
 
 import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Chat
+
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
+import androidx.compose.material3.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import fr.isen.boussougou.socialsphere.data.repository.AuthRepository
+import fr.isen.boussougou.socialsphere.ui.screens.profile.ChatScreen
 import fr.isen.boussougou.socialsphere.ui.screens.profile.HomeScreen
+//mport androidx.compose.material.icons.Icons
+import fr.isen.boussougou.socialsphere.ui.screens.profile.ProfileScreen
 import fr.isen.boussougou.socialsphere.ui.screens.profile.ProfileSetupScreen
 
 /**
@@ -83,6 +93,20 @@ fun AuthNavigation(modifier: Modifier = Modifier, authRepository: AuthRepository
          */
         composable("home") {
             HomeScreen()
+        }
+
+        /**
+         * Chat Screen: Displays chat functionality (placeholder for now).
+         */
+        composable("chat") {
+            ChatScreen()
+        }
+
+        /**
+         * Profile Screen: Displays user profile (placeholder for now).
+         */
+        composable("profile") {
+            ProfileScreen()
         }
     }
 }
