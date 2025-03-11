@@ -13,10 +13,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.compose.material3.*
 import androidx.compose.foundation.layout.padding
 
-
-/**
- * Composable that manages the navigation flow between Profile-related screens.
- */
 @Composable
 fun ProNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
@@ -29,35 +25,26 @@ fun ProNavigation(modifier: Modifier = Modifier) {
             startDestination = "home",
             modifier = modifier.padding(innerPadding)
         ) {
-            /**
-             * Home Screen: Displays the main content of the app (placeholder for now).
-             */
             composable("home") {
                 HomeScreen()
             }
 
-            /**
-             * Chat Screen: Displays chat functionality (placeholder for now).
-             */
             composable("chat") {
                 ChatScreen()
             }
 
-            /**
-             * Profile Screen: Displays user profile (placeholder for now).
-             */
             composable("profile") {
-                ProfileScreen()
+                ProfileScreen(
+                    navController = navController,
+                    userName = "Default User",
+                    userJob = "Default Job",
+                    userDescription = "Default Description"
+                )
             }
         }
     }
 }
 
-/**
- * Bottom navigation bar for navigating between Home, Chat, and Profile screens.
- *
- * @param navController NavHostController for managing navigation between screens.
- */
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
     NavigationBar {

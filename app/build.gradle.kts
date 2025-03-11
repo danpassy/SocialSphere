@@ -82,4 +82,14 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-storage")
+
+
+    implementation ("androidx.compose.foundation:foundation:1.4.0")  // Pour les fonctions comme `clip`
+    implementation ("androidx.compose.material3:material3:1.0.0")   // Pour les composants Material 3
+    implementation ("androidx.compose.ui:ui:1.4.0")                 // Pour les fonctionnalités de base
+    implementation ("io.coil-kt:coil-compose:2.4.0")
+
+    implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
+    implementation("com.google.firebase:firebase-firestore")
 }
+
