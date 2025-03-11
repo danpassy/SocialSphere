@@ -50,6 +50,14 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
+    // Accompanist libraries for Compose
+    //implementation ("com.google.accompanist:accompanist-imageloading-coil:2.2.2")
+    implementation ("com.google.accompanist:accompanist-permissions:0.37.2")
+    implementation("com.google.accompanist:accompanist-drawablepainter:0.37.2")
+
+
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -57,6 +65,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation("androidx.navigation:navigation-compose:2.6.0-alpha01")
 
     // Ajoutez la dépendance pour le BoM de Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
