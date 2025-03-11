@@ -75,7 +75,4 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-storage")
-
-    implementation("androidx.activity:activity-compose:1.9.0")
-
 }
