@@ -3,45 +3,32 @@ package fr.isen.boussougou.socialsphere
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import fr.isen.boussougou.socialsphere.ui.theme.SocialSphereTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import com.google.firebase.auth.FirebaseAuth
+import fr.isen.boussougou.socialsphere.ui.screens.auth.AuthNavigation
+import fr.isen.boussougou.socialsphere.data.repository.AuthRepository
 
+/**
+ * MainActivity is the entry point of the application. It sets up the Compose UI and initializes necessary dependencies.
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
+        // Initialize Firebase Auth
+        val firebaseAuth = FirebaseAuth.getInstance()
+        // Initialize AuthRepository with Firebase Auth
+        val authRepository = AuthRepository(firebaseAuth)
+
         setContent {
-            SocialSphereTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+            MaterialTheme {
+                // A surface container using the 'background' color from the theme
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    // AuthNavigation is the Composable that handles the navigation in the authentication flow
+                    AuthNavigation(authRepository = authRepository)
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    SocialSphereTheme {
-        Greeting("Android")
     }
 }
