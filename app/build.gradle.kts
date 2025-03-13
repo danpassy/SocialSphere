@@ -41,7 +41,7 @@ android {
 }
 
 dependencies {
-
+    // Core AndroidX and Compose libraries
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -50,58 +50,39 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation ("androidx.compose.material:material-icons-extended:1.7.8")
 
-
-    implementation ("androidx.navigation:navigation-compose:2.5.3")
-    implementation ("androidx.compose.material3:material3:1.2.0")
-    implementation ("androidx.activity:activity-compose:1.6.1")
-    implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.6.0-alpha01")
-
-    // Accompanist libraries for Compose
-    //implementation ("com.google.accompanist:accompanist-imageloading-coil:2.2.2")
-    implementation ("com.google.accompanist:accompanist-permissions:0.37.2")
-    implementation("com.google.accompanist:accompanist-drawablepainter:0.37.2")
-    implementation(libs.firebase.firestore)
-    implementation(libs.firebase.functions)
-    implementation(libs.firebase.messaging)
-    implementation(libs.firebase.vertexai)
-
-
-
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+    // Compose Material Design and Navigation
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
     implementation("androidx.navigation:navigation-compose:2.6.0-alpha01")
-
     implementation("androidx.compose.material3:material3:1.3.1")
 
-    implementation("androidx.compose.ui:ui:1.6.3")
-    implementation("androidx.compose.material:material:1.7.8")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.7.8")
-    debugImplementation("androidx.compose.ui:ui-tooling:1.7.8")
-    //implementation("androidx.compose.foundation:foundation:1.6.3")
-    implementation("androidx.activity:activity-compose:1.8.2")
-    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+    // Accompanist libraries for Compose
+    implementation("com.google.accompanist:accompanist-permissions:0.37.2")
+    implementation("com.google.accompanist:accompanist-drawablepainter:0.37.2")
 
-    // Ajoutez la dépendance pour le BoM de Firebase
+    // Firebase dependencies (BoM for version management)
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
-
-    //Dépendances pour les produits Firebase
+    
+    // Firebase products
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-storage")
-    // Firebase Firestore
-    implementation ("com.google.firebase:firebase-firestore-ktx:24.3.0")
-    implementation ("com.google.firebase:firebase-analytics-ktx")
-    implementation ("androidx.compose.ui:ui:1.7.8" )// Use the latest version suitable for your project
-    implementation ("androidx.compose.foundation:foundation:1.7.8" )// For basic UI components
-    implementation ("androidx.compose.material:material:1.7.8" )// For Material Design components
-    // Make sure to include any other necessary dependencies for your project.
+    
+    // Firestore and Analytics with KTX support
+    implementation("com.google.firebase:firebase-firestore-ktx:24.3.0")
+    implementation("com.google.firebase:firebase-analytics-ktx")
 
+    // Coil for image loading in Compose
+    implementation("io.coil-kt:coil-compose:2.4.0")
+
+    // Testing dependencies
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+
+    debugImplementation(libs.androidx.ui.tooling)
 }
