@@ -82,4 +82,10 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-storage")
+
+    implementation("io.coil-kt:coil-compose:2.5.0") // Or the latest version of Coil
+    implementation("com.google.firebase:firebase-firestore-ktx:24.1.0") // Or the latest version
+    implementation("com.google.firebase:firebase-storage-ktx:20.0.0") // Or the latest version
+    implementation("androidx.compose.ui:ui:1.5.4") // or whatever version of compose you use
+
 }
