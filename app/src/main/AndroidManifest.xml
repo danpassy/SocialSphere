@@ -6,7 +6,6 @@
     <!-- Permission pour utiliser la caméra -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
-
     <!-- Permission pour écrire dans le stockage (pour enregistrer les images prises) -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
