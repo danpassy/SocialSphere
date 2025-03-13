@@ -52,7 +52,12 @@ fun ProNavigation(modifier: Modifier = Modifier) {
              * Écran affichant les informations du profil utilisateur.
              */
             composable("profile") {
-                ProfileScreen()
+                ProfileScreen(
+                    navController = navController,
+                    userName = "John Doe", // Remplacez par une valeur réelle ou un état
+                    userJob = "Developer", // Remplacez par une valeur réelle ou un état
+                    userDescription = "Passionate about mobile development" // Remplacez par une valeur réelle ou un état
+                )
             }
         }
     }
