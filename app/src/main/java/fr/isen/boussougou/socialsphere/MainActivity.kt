@@ -6,31 +6,43 @@ import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import com.google.firebase.auth.FirebaseAuth
+import fr.isen.boussougou.socialsphere.data.repository.AuthRepository
 import fr.isen.boussougou.socialsphere.ui.screens.auth.AuthNavigation
 import fr.isen.boussougou.socialsphere.ui.screens.profile.ProNavigation
-import fr.isen.boussougou.socialsphere.data.repository.AuthRepository
 
 /**
- * MainActivity is the entry point of the application. It sets up the Compose UI and initializes necessary dependencies.
+ * Point d'entrée principal de l'application SocialSphere.
+ *
+ * Cette activité initialise l'interface utilisateur Compose et configure la navigation principale
+ * en fonction de l'état d'authentification de l'utilisateur.
  */
 class MainActivity : ComponentActivity() {
+
+    /**
+     * Méthode appelée lors de la création de l'activité.
+     *
+     * Initialise Firebase Authentication, AuthRepository, et définit le contenu Compose principal.
+     *
+     * @param savedInstanceState état sauvegardé lors d'une éventuelle recréation de l'activité.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Initialize Firebase Auth
+        // Initialisation de Firebase Authentication
         val firebaseAuth = FirebaseAuth.getInstance()
-        // Initialize AuthRepository with Firebase Auth
+
+        // Création du repository d'authentification avec Firebase Auth
         val authRepository = AuthRepository(firebaseAuth)
 
         setContent {
             MaterialTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    // Decide which navigation to use based on the app state or logic
+                    // Navigation conditionnelle basée sur l'état d'authentification utilisateur
                     if (isUserLoggedIn(authRepository)) {
-                        // If the user is logged in, navigate to ProNavigation (profile-related screens)
+                        // Si l'utilisateur est connecté, afficher la navigation principale (ProNavigation)
                         ProNavigation()
                     } else {
-                        // If the user is not logged in, navigate to AuthNavigation (authentication screens)
+                        // Si l'utilisateur n'est pas connecté, afficher la navigation d'authentification (AuthNavigation)
                         AuthNavigation(authRepository = authRepository)
                     }
                 }
@@ -39,10 +51,10 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * Checks if a user is logged in using Firebase Authentication.
+     * Vérifie si un utilisateur est actuellement connecté via Firebase Authentication.
      *
-     * @param authRepository The repository managing authentication logic.
-     * @return True if a user is logged in, false otherwise.
+     * @param authRepository Repository gérant la logique d'authentification.
+     * @return true si un utilisateur est connecté, false sinon.
      */
     private fun isUserLoggedIn(authRepository: AuthRepository): Boolean {
         return authRepository.getCurrentUser() != null
