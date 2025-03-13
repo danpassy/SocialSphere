@@ -109,7 +109,7 @@ fun ProfileScreen(
                 ActionButton(
                     text = "Edit Profile",
                     icon = Icons.Default.Edit,
-                    onClick = { navController.navigate("edit_profile") },
+                    onClick = { navController.navigate("profile_setup_screen") },
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(8.dp))

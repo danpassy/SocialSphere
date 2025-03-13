@@ -1,8 +1,8 @@
 package fr.isen.boussougou.socialsphere.ui.screens.profile
 
-
-
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -10,72 +10,58 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import fr.isen.boussougou.socialsphere.ui.components.UserSearchItem
+import fr.isen.boussougou.socialsphere.data.repository.FirestoreRepository
+import com.google.firebase.firestore.DocumentSnapshot
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.draw.clip
-//import androidx.compose.ui.unit.Dp
-import androidx.compose.foundation.background
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.filled.Person
-import androidx.navigation.NavHostController
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.shape.CircleShape
+import fr.isen.boussougou.socialsphere.models.User // Import correct
+
 
 
 /**
- * Home screen displaying a top bar with the app name, a search bar, and a horizontal row with icons for adding stories, posts, and accessing the profile.
+ * Home screen displaying a top bar with the app name, a search bar, and a list of search results for users.
  * @param navController Navigation controller to handle screen transitions.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavHostController) {
-    var searchQuery by remember { mutableStateOf("") }
-
-    val titleStyle = TextStyle(
-        color = Color.White,
-        fontFamily = FontFamily.Cursive,
-        fontSize = 24.sp
+    val firestoreRepository = FirestoreRepository(
+        firestore = com.google.firebase.firestore.FirebaseFirestore.getInstance(),
+        auth = com.google.firebase.auth.FirebaseAuth.getInstance()
     )
 
-    val topAppBarBackgroundColor = Color(0xFF64B5F6) // Light blue
+    var searchQuery by remember { mutableStateOf("") }
+    var searchResults by remember { mutableStateOf<List<DocumentSnapshot>>(emptyList()) }
+    var isSearching by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = Modifier.clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
-                    .background(topAppBarBackgroundColor),
-                title = {
-                    Text("SocialSphere", style = titleStyle)
-                },
+                title = { Text("SocialSphere") },
                 actions = {
                     OutlinedTextField(
                         value = searchQuery,
-                        onValueChange = { searchQuery = it },
+                        onValueChange = { query ->
+                            searchQuery = query
+                            isSearching = true
+                            firestoreRepository.searchUsers(query) { results ->
+                                searchResults = results
+                                isSearching = false
+                            }
+                        },
                         placeholder = { Text("Search...") },
                         singleLine = true,
                         modifier = Modifier
                             .padding(end = 8.dp)
-                            .width(160.dp)
-                            .height(50.dp),
+                            .width(200.dp),
                         leadingIcon = {
-                            Icon(Icons.Filled.Search, contentDescription = "Search")
+                            Icon(Icons.Filled.Search, contentDescription = "Search Icon")
                         },
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search)
                     )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                    titleContentColor = Color.White
-                )
+                }
             )
         }
     ) { innerPadding ->
@@ -87,48 +73,45 @@ fun HomeScreen(navController: NavHostController) {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                // Icon for adding a story
-                IconButton(onClick = { navController.navigate("AddStoryScreen") }) {
-                    Icon(Icons.Filled.Add, contentDescription = "Add Story", tint = Color.Blue)
-                }
+            if (isSearching) {
+                CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+            } else if (searchResults.isNotEmpty()) {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(searchResults) { document ->
+                        val userId = document.id
+                        val userName = document.getString("name") ?: "Unknown"
+                        val userSurname = document.getString("surname") ?: "Unknown"
+                        val userJob = document.getString("job") ?: "No Job Provided"
+                        val profileImageUrl = document.getString("profile_image_url")
 
-                // User's profile image loaded from the user's setup profile data
-                var bitmap by remember { mutableStateOf(null) } // Placeholder for actual image loading logic from ProfileSetupScreen
-                if (bitmap != null) {
-                    Image(
-                        bitmap = bitmap!!.asImageBitmap(),
-                        contentDescription = "Profile Image",
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .clickable { navController.navigate("Profile") }
-                    )
-                } else {
-                    Icon(Icons.Filled.Person, contentDescription = "Profile Placeholder",
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clickable { navController.navigate("Profile") },
-                            tint = Color.Blue
-                    )
+                        UserSearchItem(
+                            user = User(
+                                id = userId,
+                                name = userName,
+                                surname = userSurname,
+                                job = userJob,
+                                profileImageUrl = profileImageUrl ?: ""
+                            ),
+                            onClick = {
+                                navController.navigate("external_profile_screen/$userId")
+                            }
+                        )
+                    }
                 }
-
-                // Icon for making a post
-                IconButton(onClick = { navController.navigate("AddPostScreen") }) {
-                    Icon(Icons.Filled.Send, contentDescription = "Make Post", tint = Color.Blue)
-                }
+            } else {
+                Text("No results found.", style = MaterialTheme.typography.bodyMedium)
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "En cours de développement...",
-                style = MaterialTheme.typography.headlineMedium,
-                textAlign = TextAlign.Center
-            )
         }
     }
 }
+
+/**
+ * Data class representing a User object for displaying in the search results.
+ */
+data class User(
+    val id: String,
+    val name: String,
+    val surname: String,
+    val job: String,
+    val profileImageUrl: String
+)
