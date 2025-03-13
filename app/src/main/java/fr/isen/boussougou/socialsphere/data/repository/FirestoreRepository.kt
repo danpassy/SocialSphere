@@ -97,4 +97,59 @@ class FirestoreRepository(
                 onComplete(false)
             }
     }
+    fun followUser(currentUserId: String, targetUserId: String, onComplete: (Boolean) -> Unit) {
+        val currentUserRef = firestore.collection("users").document(currentUserId)
+        val targetUserRef = firestore.collection("users").document(targetUserId)
+
+        firestore.runBatch { batch ->
+            // Ajouter l'utilisateur cible à la liste "following" du current user
+            batch.set(currentUserRef.collection("following").document(targetUserId), mapOf("userId" to targetUserId))
+
+            // Ajouter l'utilisateur actuel à la liste "followers" du target user
+            batch.set(targetUserRef.collection("followers").document(currentUserId), mapOf("userId" to currentUserId))
+
+            // Incrémenter les compteurs
+            batch.update(currentUserRef, "followingCount", com.google.firebase.firestore.FieldValue.increment(1))
+            batch.update(targetUserRef, "followersCount", com.google.firebase.firestore.FieldValue.increment(1))
+        }.addOnSuccessListener {
+            onComplete(true)
+        }.addOnFailureListener {
+            onComplete(false)
+        }
+    }
+
+    fun unfollowUser(currentUserId: String, targetUserId: String, onComplete: (Boolean) -> Unit) {
+        val currentUserRef = firestore.collection("users").document(currentUserId)
+        val targetUserRef = firestore.collection("users").document(targetUserId)
+
+        firestore.runBatch { batch ->
+            // Supprimer l'utilisateur cible de la liste "following" du current user
+            batch.delete(currentUserRef.collection("following").document(targetUserId))
+
+            // Supprimer l'utilisateur actuel de la liste "followers" du target user
+            batch.delete(targetUserRef.collection("followers").document(currentUserId))
+
+            // Décrémenter les compteurs
+            batch.update(currentUserRef, "followingCount", com.google.firebase.firestore.FieldValue.increment(-1))
+            batch.update(targetUserRef, "followersCount", com.google.firebase.firestore.FieldValue.increment(-1))
+        }.addOnSuccessListener {
+            onComplete(true)
+        }.addOnFailureListener {
+            onComplete(false)
+        }
+    }
+
+    fun isFollowing(currentUserId: String, targetUserId: String, onResult: (Boolean) -> Unit) {
+        val followingDoc = firestore.collection("users")
+            .document(currentUserId)
+            .collection("following")
+            .document(targetUserId)
+
+        followingDoc.get().addOnSuccessListener { document ->
+            onResult(document.exists())
+        }.addOnFailureListener {
+            onResult(false)
+        }
+    }
+
 }

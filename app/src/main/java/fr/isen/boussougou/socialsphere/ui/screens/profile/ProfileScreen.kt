@@ -21,6 +21,10 @@ import coil.compose.AsyncImage
 import androidx.navigation.NavController
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.FirebaseAuth
+import androidx.compose.runtime.*
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +35,29 @@ fun ProfileScreen(
     userDescription: String,
     profileImageUrl: String?
 ) {
+    val firestore = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
+    val currentUserId = auth.currentUser?.uid ?: ""
+
+    // State variables for followers and following counts
+    var followersCount by remember { mutableStateOf(0) }
+    var followingCount by remember { mutableStateOf(0) }
+
+    // Fetch followers and following counts from Firestore
+    LaunchedEffect(currentUserId) {
+        if (currentUserId.isNotEmpty()) {
+            firestore.collection("users").document(currentUserId).get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        followersCount = document.getLong("followersCount")?.toInt() ?: 0
+                        followingCount = document.getLong("followingCount")?.toInt() ?: 0
+                    }
+                }
+                .addOnFailureListener {
+                    // Handle errors if necessary
+                }
+        }
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -83,8 +110,8 @@ fun ProfileScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     ProfileStat(title = "Posts", count = "0")
-                    ProfileStat(title = "Followers", count = "0")
-                    ProfileStat(title = "Following", count = "0")
+                    ProfileStat(title = "Followers", count = followersCount.toString())
+                    ProfileStat(title = "Following", count = followingCount.toString())
                 }
             }
 
