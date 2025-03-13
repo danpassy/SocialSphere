@@ -3,11 +3,15 @@ package fr.isen.boussougou.socialsphere.ui.screens.profile
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.navigation.NavHostController
@@ -15,8 +19,11 @@ import fr.isen.boussougou.socialsphere.ui.components.UserSearchItem
 import fr.isen.boussougou.socialsphere.data.repository.FirestoreRepository
 import com.google.firebase.firestore.DocumentSnapshot
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.Alignment
-import fr.isen.boussougou.socialsphere.models.User // Import correct
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.background
+import fr.isen.boussougou.socialsphere.models.User
 
 
 
@@ -36,10 +43,24 @@ fun HomeScreen(navController: NavHostController) {
     var searchResults by remember { mutableStateOf<List<DocumentSnapshot>>(emptyList()) }
     var isSearching by remember { mutableStateOf(false) }
 
+    // Style pour le titre du TopAppBar
+    val titleStyle = TextStyle(
+        color = Color.White,
+        fontFamily = FontFamily.Cursive,
+        fontSize = 24.sp
+    )
+
+    // Couleur de fond pour le TopAppBar
+    val topAppBarBackgroundColor = Color(0xFF64B5F6) // Bleu clair
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("SocialSphere") },
+                modifier = Modifier.clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
+                    .background(topAppBarBackgroundColor),
+                title = {
+                    Text("SocialSphere", style = titleStyle)
+                },
                 actions = {
                     OutlinedTextField(
                         value = searchQuery,
@@ -61,7 +82,11 @@ fun HomeScreen(navController: NavHostController) {
                         },
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search)
                     )
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    titleContentColor = Color.White
+                )
             )
         }
     ) { innerPadding ->
