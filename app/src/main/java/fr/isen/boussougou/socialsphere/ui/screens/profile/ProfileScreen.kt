@@ -1,33 +1,36 @@
 package fr.isen.boussougou.socialsphere.ui.screens.profile
 
-// Importations nécessaires pour les composants Compose et les icônes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import androidx.navigation.NavController
-import fr.isen.boussougou.socialsphere.R
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(navController: NavController, userName: String, userJob: String, userDescription: String) {
-    // Scaffold fournit une structure de base pour l'écran avec une barre supérieure
+fun ProfileScreen(
+    navController: NavController,
+    userName: String,
+    userJob: String,
+    userDescription: String,
+    profileImageUrl: String?
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -40,7 +43,6 @@ fun ProfileScreen(navController: NavController, userName: String, userJob: Strin
             )
         }
     ) { innerPadding ->
-        // Contenu principal de l'écran
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -52,16 +54,29 @@ fun ProfileScreen(navController: NavController, userName: String, userJob: Strin
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Photo de profil
-                Image(
-                    painter = painterResource(id = R.drawable.default_profile_picture),
-                    contentDescription = "Profile Picture",
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
+                Box(
+                    modifier = Modifier.size(100.dp).clip(CircleShape),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (profileImageUrl != null) {
+                        AsyncImage(
+                            model = profileImageUrl,
+                            contentDescription = "Profile Picture",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop,
+                        )
+                    } else {
+                        Icon(
+                            Icons.Default.Person,
+                            contentDescription = "Default Profile Picture",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(60.dp),
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.width(16.dp))
+
                 // Statistiques (Posts, Followers, Following)
                 Row(
                     modifier = Modifier.weight(1f),
@@ -73,13 +88,13 @@ fun ProfileScreen(navController: NavController, userName: String, userJob: Strin
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // Informations de l'utilisateur
+            // User information section (Name, Job, Description)
             Text(userName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Text(userJob, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             // Description de l'utilisateur
             Text(userDescription, style = MaterialTheme.typography.bodyMedium)
@@ -94,7 +109,7 @@ fun ProfileScreen(navController: NavController, userName: String, userJob: Strin
                 ActionButton(
                     text = "Edit Profile",
                     icon = Icons.Default.Edit,
-                    onClick = { navController.navigate("profile_setup_screen") },
+                    onClick = { navController.navigate("edit_profile") },
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -131,39 +146,36 @@ fun ProfileScreen(navController: NavController, userName: String, userJob: Strin
     }
 }
 
-// Composant pour afficher une statistique du profil
 @Composable
 fun ProfileStat(title: String, count: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(count, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        Text(title, style = MaterialTheme.typography.bodySmall)
+    Column(horizontalAlignment=Alignment.CenterHorizontally) {
+        Text(count, style=MaterialTheme.typography.titleMedium, fontWeight=FontWeight.Bold)
+        Text(title, style=MaterialTheme.typography.bodySmall)
     }
 }
 
-// Composant pour les boutons d'action principaux
 @Composable
-fun ActionButton(text: String, icon: ImageVector, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun ActionButton(text: String, icon: ImageVector, onClick: () -> Unit, modifier: Modifier=Modifier) {
     Button(
-        onClick = onClick,
-        modifier = modifier.height(36.dp),
-        shape = RoundedCornerShape(4.dp)
+        onClick=onClick,
+        modifier=modifier.height(36.dp),
+        shape=RoundedCornerShape(4.dp),
     ) {
-        Icon(icon, contentDescription = text, modifier = Modifier.size(18.dp))
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(text, style = MaterialTheme.typography.bodySmall)
+        Icon(icon, contentDescription=text, modifier=Modifier.size(18.dp))
+        Spacer(modifier=Modifier.width(4.dp))
+        Text(text, style=MaterialTheme.typography.bodySmall)
     }
 }
 
-// Composant pour les petits boutons d'action (Add Post, Add Story)
 @Composable
-fun SmallActionButton(text: String, icon: ImageVector, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun SmallActionButton(text: String, icon: ImageVector, onClick: () -> Unit, modifier: Modifier=Modifier) {
     OutlinedButton(
-        onClick = onClick,
-        modifier = modifier.height(32.dp),
-        shape = RoundedCornerShape(4.dp)
+        onClick=onClick,
+        modifier=modifier.height(32.dp),
+        shape=RoundedCornerShape(4.dp),
     ) {
-        Icon(icon, contentDescription = text, modifier = Modifier.size(16.dp))
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(text, style = MaterialTheme.typography.bodySmall)
+        Icon(icon, contentDescription=text, modifier=Modifier.size(16.dp))
+        Spacer(modifier=Modifier.width(4.dp))
+        Text(text, style=MaterialTheme.typography.bodySmall)
     }
 }
