@@ -1,30 +1,65 @@
 package fr.isen.boussougou.socialsphere.ui.screens.profile
 
 import androidx.compose.runtime.Composable
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.*
+import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.NavHostController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import androidx.compose.runtime.*
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.*
-import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.graphics.vector.ImageVector
-
+import androidx.compose.material.icons.filled.Home
 
 /**
- * Gestionnaire principal de navigation des écrans liés au profil utilisateur.
- * Ce composable affiche une barre de navigation inférieure permettant de naviguer entre les écrans Home, Chat et Profile.
+ * Main navigation manager for user-related screens.
+ * This composable displays a bottom navigation bar allowing navigation between Home, Chat, and Profile screens.
  *
- * @param modifier Modificateur pour appliquer des personnalisations supplémentaires.
+ * @param modifier Modifier for applying additional customizations.
  */
 @Composable
 fun ProNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
+
+    // State variables for user data
+    var userName by remember { mutableStateOf("Loading...") }
+    var userJob by remember { mutableStateOf("Loading...") }
+    var userDescription by remember { mutableStateOf("Loading...") }
+    var profileImageUrl by remember { mutableStateOf<String?>(null) }
+
+    // Fetch user data from Firestore when ProNavigation is displayed
+    val firestore = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
+    val userId = auth.currentUser?.uid
+
+    LaunchedEffect(userId) {
+        if (userId != null) {
+            firestore.collection("users").document(userId).get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        userName = document.getString("name") ?: "Unknown"
+                        userJob = document.getString("job") ?: "Unknown"
+                        userDescription = document.getString("description") ?: "No description provided"
+                        profileImageUrl = document.getString("profile_image_url")
+                    }
+                }
+                .addOnFailureListener {
+                    userName = "Error loading data"
+                    userJob = "Error loading data"
+                    userDescription = "Error loading data"
+                }
+        }
+    }
 
     Scaffold(
         bottomBar = { BottomNavigationBar(navController) }
@@ -35,38 +70,46 @@ fun ProNavigation(modifier: Modifier = Modifier) {
             modifier = modifier.padding(innerPadding)
         ) {
             /**
-             * Écran d'accueil principal affiché après la configuration du profil utilisateur.
+             * Main home screen displayed after the user's profile setup.
              */
             composable("home") {
-                HomeScreen(navController = navController) // Passez l'image de profil si disponible
+                HomeScreen(navController)
             }
 
             /**
-             * Écran de chat permettant aux utilisateurs d'interagir via messagerie instantanée.
+             * Chat screen allowing users to interact via instant messaging.
              */
             composable("chat") {
                 ChatScreen()
             }
 
             /**
-             * Écran affichant les informations du profil utilisateur.
+             * Profile screen displaying the user's information dynamically fetched from Firestore.
              */
             composable("profile") {
                 ProfileScreen(
                     navController = navController,
-                    userName = "John Doe", // Remplacez par une valeur réelle ou un état
-                    userJob = "Developer", // Remplacez par une valeur réelle ou un état
-                    userDescription = "Passionate about mobile development" // Remplacez par une valeur réelle ou un état
+                    userName = userName,
+                    userJob = userJob,
+                    userDescription = userDescription,
+                    profileImageUrl = profileImageUrl
                 )
+            }
+
+            /**
+             * Edit Profile screen for updating user details.
+             */
+            composable("edit_profile") {
+                ProfileSetupScreen(navController = navController)
             }
         }
     }
 }
 
 /**
- * Composable représentant la barre de navigation inférieure permettant de naviguer entre les écrans principaux.
+ * Composable representing the bottom navigation bar allowing navigation between main screens.
  *
- * @param navController Contrôleur de navigation pour gérer les déplacements entre les écrans.
+ * @param navController Navigation controller to manage transitions between screens.
  */
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
@@ -83,7 +126,7 @@ fun BottomNavigationBar(navController: NavHostController) {
             NavigationBarItem(
                 icon = { Icon(item.icon, contentDescription = item.label) },
                 label = { Text(item.label) },
-                selected = navController.currentDestination?.route == item.route,
+                selected = currentRoute == item.route,
                 onClick = {
                     navController.navigate(item.route) {
                         launchSingleTop = true
@@ -96,17 +139,10 @@ fun BottomNavigationBar(navController: NavHostController) {
 }
 
 /**
- * Classe représentant les éléments individuels de la barre de navigation inférieure.
+ * Data class representing individual items in the bottom navigation bar.
  *
- * @param route Route associée à l'écran cible pour la navigation.
- * @param icon Icône à afficher dans la barre de navigation.
- * @param label Libellé affiché sous l'icône.
+ * @param route Route associated with the target screen for navigation.
+ * @param icon Icon to display in the navigation bar.
+ * @param label Label displayed below the icon.
  */
-data class BottomNavItem(val route: String, val icon: ImageVector, val label: String)
-
-// Liste des éléments affichés dans la barre de navigation inférieure
-private val items = listOf(
-    BottomNavItem("home", Icons.Filled.Home, "Home"),
-    BottomNavItem("chat", Icons.Filled.Chat, "Chat"),
-    BottomNavItem("profile", Icons.Default.Person, "Profile")
-)
+data class BottomNavItem(val label: String, val icon: ImageVector, val route: String)

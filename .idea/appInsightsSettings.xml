@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="fr.isen.boussougou.socialsphere" />
-                  <option name="mobileSdkAppId" value="1:581339034559:android:2db6942e71f1153cb6e70a" />
-                  <option name="projectId" value="socialsphere-c675e" />
-                  <option name="projectNumber" value="581339034559" />
+                  <option name="appId" value="PLACEHOLDER" />
+                  <option name="mobileSdkAppId" value="" />
+                  <option name="projectId" value="" />
+                  <option name="projectNumber" value="" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
