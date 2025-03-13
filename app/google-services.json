@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "581339034559",
+    "firebase_url": "https://socialsphere-c675e-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "socialsphere-c675e",
+    "storage_bucket": "socialsphere-c675e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:581339034559:android:2db6942e71f1153cb6e70a",
+        "android_client_info": {
+          "package_name": "fr.isen.boussougou.socialsphere"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "581339034559-99m4tasc5d6034749ihmo7383jtl1o13.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "fr.isen.boussougou.socialsphere",
+            "certificate_hash": "e84324cf955c45251ac13acb76b434cc97aa943a"
+          }
+        },
+        {
+          "client_id": "581339034559-oenkk3s01r12gc2p7a2fgh7uf4c1kcir.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5wgdV7Lizoq_vmigNTDv55LgB1GZm6AQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "581339034559-jv092p3mgllvguul67giambo7n06ievd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
