@@ -99,8 +99,15 @@ fun ProNavigation(modifier: Modifier = Modifier) {
             /**
              * Edit Profile screen for updating user details.
              */
-            composable("edit_profile") {
+            composable("profile_setup_screen") {
                 ProfileSetupScreen(navController = navController)
+            }
+            /**
+             * External Profile screen for viewing other users' profiles.
+             */
+            composable("external_profile_screen/{userId}") { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId")
+                ExternalProfileScreen(userId)
             }
         }
     }
