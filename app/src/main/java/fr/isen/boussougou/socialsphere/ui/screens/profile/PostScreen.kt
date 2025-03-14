@@ -3,7 +3,9 @@ package fr.isen.boussougou.socialsphere.ui.screens.profile
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,8 +19,9 @@ import com.google.firebase.storage.FirebaseStorage
 import fr.isen.boussougou.socialsphere.data.repository.StorageRepository
 import androidx.navigation.NavHostController
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.material.icons.filled.ArrowBack
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,23 +36,7 @@ fun PostScreen(navController: NavHostController) {
     var mediaUris by remember { mutableStateOf(emptyList<Uri>()) }
     var uploadProgress by remember { mutableStateOf(0f) }
     var isUploading by remember { mutableStateOf(false) }
-    var userName by remember { mutableStateOf("") }
-    var userProfileImageUrl by remember { mutableStateOf("") }
-
-    // Fetch user details from Firestore
-    LaunchedEffect(auth.currentUser?.uid) {
-        val userId = auth.currentUser?.uid ?: return@LaunchedEffect
-        firestore.collection("users").document(userId).get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    userName = document.getString("name") ?: "Unknown"
-                    userProfileImageUrl = document.getString("profile_image_url") ?: ""
-                }
-            }
-            .addOnFailureListener {
-                println("Error fetching user details: $it")
-            }
-    }
+    var descriptionText by remember { mutableStateOf("") } // State for the description text
 
     // Launcher for selecting images or videos
     val mediaPickerLauncher = rememberLauncherForActivityResult(
@@ -102,6 +89,28 @@ fun PostScreen(navController: NavHostController) {
                     }
                 }
 
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Text field for post description
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
+                        .padding(8.dp)
+                ) {
+                    TextField(
+                        value = descriptionText,
+                        onValueChange = { descriptionText = it },
+                        placeholder = { Text("Enter a description for your post...") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.colors(
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedContainerColor = Color.Transparent,
+                            cursorColor = Color.Blue
+                        )
+                    )
+                }
+
                 Spacer(modifier = Modifier.weight(1f)) // Flexible space to push buttons to the bottom
 
                 // Buttons for adding media and sharing the post
@@ -121,26 +130,16 @@ fun PostScreen(navController: NavHostController) {
 
                     Button(
                         onClick = {
-                            if (mediaUris.isNotEmpty() && userName.isNotBlank()) {
+                            if (mediaUris.isNotEmpty()) {
                                 isUploading = true
                                 storageRepository.uploadPostMedia(mediaUris.first(), false, onProgress={ progress ->
                                     uploadProgress = progress
                                 }, onComplete={ downloadUrl ->
                                     if (downloadUrl != null) {
-                                        savePostToFirestore(
-                                            mediaUrl = downloadUrl,
-                                            description = "", // Add description logic if needed
-                                            firestore = firestore,
-                                            userId = auth.currentUser?.uid ?: "",
-                                            userName = userName,
-                                            userProfileImageUrl = userProfileImageUrl
-                                        )
+                                        savePostToFirestore(downloadUrl, descriptionText, firestore, auth.currentUser?.uid ?: "")
                                     }
                                     isUploading = false
-                                    navController.popBackStack() // Navigate back after success
                                 })
-                            } else {
-                                println("Media or User Information Missing")
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
@@ -161,29 +160,92 @@ fun PostScreen(navController: NavHostController) {
     )
 }
 
-// Function to save post data to Firestore with description and media URL
+/**
+
+fun savePostToFirestore(
+mediaUrl: String,
+description: String,
+firestore: FirebaseFirestore,
+userId: String
+) {
+// Récupérer les informations utilisateur
+firestore.collection("users").document(userId).get()
+.addOnSuccessListener { document ->
+if (document.exists()) {
+val userName = document.getString("name") ?: "Unknown"
+val userProfileImageUrl = document.getString("profile_image_url") ?: ""
+
+// Préparer les données du post
+val postData = mapOf(
+"userId" to userId,
+"userName" to userName,
+"userProfileImageUrl" to userProfileImageUrl,
+"mediaUrl" to mediaUrl,
+"description" to description,
+"likesCount" to 0,
+"likedBy" to emptyList<String>(),
+"commentsCount" to 0,
+"timestamp" to System.currentTimeMillis()
+)
+
+// Ajouter le post à Firestore
+firestore.collection("posts").add(postData)
+.addOnSuccessListener {
+println("Post saved successfully.")
+}
+.addOnFailureListener { e: Exception ->
+println("Error saving post: $e")
+}
+} else {
+println("User document does not exist.")
+}
+}
+.addOnFailureListener { e: Exception ->
+println("Error fetching user data: $e")
+}
+}
+ **/
+
 fun savePostToFirestore(
     mediaUrl: String,
     description: String,
     firestore: FirebaseFirestore,
-    userId: String,
-    userName: String,
-    userProfileImageUrl: String
+    userId: String
 ) {
-    val postData = mapOf(
-        "userId" to userId,
-        "userName" to userName,
-        "userProfileImageUrl" to userProfileImageUrl,
-        "mediaUrl" to mediaUrl,
-        "description" to description,
-        "likesCount" to 0,
-        "commentsCount" to 0,
-        "timestamp" to System.currentTimeMillis()
-    )
+    firestore.collection("users").document(userId).get()
+        .addOnSuccessListener { document ->
+            if (document.exists()) {
+                val userName = document.getString("name") ?: "Unknown"
+                val userProfileImageUrl = document.getString("profile_image_url") ?: ""
 
-    firestore.collection("posts").add(postData).addOnSuccessListener {
-        println("Post saved successfully.")
-    }.addOnFailureListener { e ->
-        println("Error saving post: $e")
-    }
+                val postData = mapOf(
+                    "userId" to userId,
+                    "userName" to userName,
+                    "userProfileImageUrl" to userProfileImageUrl,
+                    "mediaUrl" to mediaUrl,
+                    "description" to description,
+                    "likesCount" to 0,
+                    "likedBy" to emptyList<String>(),
+                    "commentsCount" to 0,
+                    "timestamp" to System.currentTimeMillis()
+                )
+
+                firestore.collection("posts").add(postData)
+                    .addOnSuccessListener {
+                        println("Post saved successfully.")
+                    }
+                    .addOnFailureListener { e ->
+                        println("Error saving post: $e")
+                    }
+            } else {
+                println("User document does not exist.")
+            }
+        }
+        .addOnFailureListener { e ->
+            println("Error fetching user data: $e")
+        }
 }
+
+
+
+
