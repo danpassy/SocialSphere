@@ -18,18 +18,11 @@ import fr.isen.boussougou.socialsphere.ui.screens.profile.ProNavigation
  */
 class MainActivity : ComponentActivity() {
 
-    /**
-     * Méthode appelée lors de la création de l'activité.
-     *
-     * Initialise Firebase Authentication, AuthRepository, et définit le contenu Compose principal.
-     *
-     * @param savedInstanceState état sauvegardé lors d'une éventuelle recréation de l'activité.
-     */
+    // Initialisation de Firebase Authentication
+    private val firebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Initialisation de Firebase Authentication
-        val firebaseAuth = FirebaseAuth.getInstance()
 
         // Création du repository d'authentification avec Firebase Auth
         val authRepository = AuthRepository(firebaseAuth)
@@ -38,12 +31,22 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
                     // Navigation conditionnelle basée sur l'état d'authentification utilisateur
-                    if (isUserLoggedIn(authRepository)) {
+                    val isUserLoggedIn = isUserLoggedIn(authRepository)
+
+                    if (isUserLoggedIn) {
                         // Si l'utilisateur est connecté, afficher la navigation principale (ProNavigation)
-                        ProNavigation()
+                        ProNavigation(onLogout = {
+                            firebaseAuth.signOut() // Déconnexion de Firebase
+                            recreate() // Redémarre l'activité pour réinitialiser la navigation
+                        })
                     } else {
                         // Si l'utilisateur n'est pas connecté, afficher la navigation d'authentification (AuthNavigation)
-                        AuthNavigation(authRepository = authRepository)
+                        AuthNavigation(
+                            authRepository = authRepository,
+                            onLogout = {
+                                firebaseAuth.signOut()
+                                recreate()
+                            })
                     }
                 }
             }

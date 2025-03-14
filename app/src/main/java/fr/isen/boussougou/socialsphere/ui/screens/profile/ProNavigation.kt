@@ -28,7 +28,7 @@ import androidx.compose.material.icons.filled.Home
  * @param modifier Modifier for applying additional customizations.
  */
 @Composable
-fun ProNavigation(modifier: Modifier = Modifier) {
+fun ProNavigation(modifier: Modifier = Modifier, onLogout: () -> Unit) {
     val navController = rememberNavController()
 
     // State variables for user data
@@ -92,7 +92,19 @@ fun ProNavigation(modifier: Modifier = Modifier) {
                     userName = userName,
                     userJob = userJob,
                     userDescription = userDescription,
-                    profileImageUrl = profileImageUrl
+                    profileImageUrl = profileImageUrl,
+                    onSettingsClick = { navController.navigate("settings") }
+                )
+            }
+
+            // Écran des paramètres
+            // Écran des paramètres
+            composable("settings") {
+                SettingsScreen(
+                    onLogout = {
+                        FirebaseAuth.getInstance().signOut() // Déconnexion Firebase
+                        onLogout() // Naviguer vers l'écran de connexion après déconnexion
+                    }
                 )
             }
 
@@ -122,6 +134,7 @@ fun ProNavigation(modifier: Modifier = Modifier) {
                     onBackClick = { navController.popBackStack() }
                 )
             }
+
         }
     }
 }

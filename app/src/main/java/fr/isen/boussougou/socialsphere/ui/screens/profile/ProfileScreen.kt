@@ -34,7 +34,8 @@ fun ProfileScreen(
     userName: String,
     userJob: String,
     userDescription: String,
-    profileImageUrl: String?
+    profileImageUrl: String?,
+    onSettingsClick: () -> Unit
 ) {
     val firestore = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
@@ -65,7 +66,8 @@ fun ProfileScreen(
             TopAppBar(
                 title = { Text(userName, fontWeight = FontWeight.Bold) },
                 actions = {
-                    IconButton(onClick = { /* TODO: Implement settings navigation */ }) {
+                    IconButton(onClick = { onSettingsClick }) {
+                        println("Navigating to Settings Screen")
                         Icon(Icons.Default.Settings, contentDescription = "Settings")
                     }
                 }
