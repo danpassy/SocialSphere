@@ -160,51 +160,6 @@ fun PostScreen(navController: NavHostController) {
     )
 }
 
-/**
-
-fun savePostToFirestore(
-mediaUrl: String,
-description: String,
-firestore: FirebaseFirestore,
-userId: String
-) {
-// Récupérer les informations utilisateur
-firestore.collection("users").document(userId).get()
-.addOnSuccessListener { document ->
-if (document.exists()) {
-val userName = document.getString("name") ?: "Unknown"
-val userProfileImageUrl = document.getString("profile_image_url") ?: ""
-
-// Préparer les données du post
-val postData = mapOf(
-"userId" to userId,
-"userName" to userName,
-"userProfileImageUrl" to userProfileImageUrl,
-"mediaUrl" to mediaUrl,
-"description" to description,
-"likesCount" to 0,
-"likedBy" to emptyList<String>(),
-"commentsCount" to 0,
-"timestamp" to System.currentTimeMillis()
-)
-
-// Ajouter le post à Firestore
-firestore.collection("posts").add(postData)
-.addOnSuccessListener {
-println("Post saved successfully.")
-}
-.addOnFailureListener { e: Exception ->
-println("Error saving post: $e")
-}
-} else {
-println("User document does not exist.")
-}
-}
-.addOnFailureListener { e: Exception ->
-println("Error fetching user data: $e")
-}
-}
- **/
 
 fun savePostToFirestore(
     mediaUrl: String,
