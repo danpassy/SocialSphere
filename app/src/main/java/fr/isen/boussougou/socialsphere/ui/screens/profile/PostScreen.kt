@@ -3,7 +3,9 @@ package fr.isen.boussougou.socialsphere.ui.screens.profile
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,7 +19,10 @@ import com.google.firebase.storage.FirebaseStorage
 import fr.isen.boussougou.socialsphere.data.repository.StorageRepository
 import androidx.navigation.NavHostController
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.material.icons.filled.ArrowBack
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,15 +33,16 @@ fun PostScreen(navController: NavHostController) {
     val storageRepository = StorageRepository(storage, auth)
 
     // State variables for media selection and upload progress
-    var mediaUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
+    var mediaUris by remember { mutableStateOf(emptyList<Uri>()) }
     var uploadProgress by remember { mutableStateOf(0f) }
     var isUploading by remember { mutableStateOf(false) }
+    var descriptionText by remember { mutableStateOf("") } // State for the description text
 
     // Launcher for selecting images or videos
     val mediaPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
     ) { uris ->
-        mediaUris = uris.take(3) // Limit to 3 media files maximum
+        mediaUris = uris.take(1) // Limit to 1 media file maximum
     }
 
     Scaffold(
@@ -52,13 +58,18 @@ fun PostScreen(navController: NavHostController) {
         },
         content = { innerPadding ->
             Column(
-                modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
-                // Display selected media (images/videos)
+                // Display selected media (image)
                 Box(
-                    modifier = Modifier.fillMaxWidth().height(300.dp), // Augmente la taille de l'image/vidéo sélectionnée
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     if (mediaUris.isNotEmpty()) {
@@ -66,67 +77,95 @@ fun PostScreen(navController: NavHostController) {
                             model = mediaUris.first(),
                             contentDescription = "Selected Media",
                             modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop,
                         )
                     } else {
-                        Icon(Icons.Default.Person, contentDescription="No Media Selected", tint=Color.Gray, modifier=Modifier.size(100.dp))
+                        Icon(
+                            Icons.Default.Person,
+                            contentDescription = "No Media Selected",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(100.dp)
+                        )
                     }
                 }
 
-                Spacer(modifier=Modifier.weight(1f)) // Espace flexible pour pousser les boutons vers le bas
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Text field for post description
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
+                        .padding(8.dp)
+                ) {
+                    TextField(
+                        value = descriptionText,
+                        onValueChange = { descriptionText = it },
+                        placeholder = { Text("Enter a description for your post...") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.colors(
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedContainerColor = Color.Transparent,
+                            cursorColor = Color.Blue
+                        )
+                    )
+                }
+
+                Spacer(modifier = Modifier.weight(1f)) // Flexible space to push buttons to the bottom
 
                 // Buttons for adding media and sharing the post
                 Row(
-                    modifier=Modifier.fillMaxWidth(),
-                    horizontalArrangement=Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                 ) {
                     Button(
-                        onClick={
-                            mediaPickerLauncher.launch("image/*")
-                        },
-                        colors=ButtonDefaults.buttonColors(containerColor=Color.Blue),
-                        modifier=Modifier.weight(1f)
+                        onClick = { mediaPickerLauncher.launch("image/*") },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Text("Add Picture", color=Color.White)
+                        Text("Add Picture", color = Color.White)
                     }
 
-                    Spacer(modifier=Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
 
                     Button(
-                        onClick={
+                        onClick = {
                             if (mediaUris.isNotEmpty()) {
-                                isUploading=true
+                                isUploading = true
                                 storageRepository.uploadPostMedia(mediaUris.first(), false, onProgress={ progress ->
-                                    uploadProgress=progress
+                                    uploadProgress = progress
                                 }, onComplete={ downloadUrl ->
                                     if (downloadUrl != null) {
-                                        savePostToFirestore(downloadUrl, firestore, auth.currentUser?.uid ?: "")
+                                        savePostToFirestore(downloadUrl, descriptionText, firestore, auth.currentUser?.uid ?: "")
                                     }
-                                    isUploading=false
+                                    isUploading = false
                                 })
                             }
                         },
-                        colors=ButtonDefaults.buttonColors(containerColor=Color.Blue),
-                        modifier=Modifier.weight(1f)
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Text("Share", color=Color.White)
+                        Text("Share", color = Color.White)
                     }
                 }
 
-                Spacer(modifier=Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 if (isUploading) {
-                    LinearProgressIndicator(progress=uploadProgress/100, modifier=Modifier.fillMaxWidth())
-                    Text(text="Uploading... ${uploadProgress.toInt()}%")
+                    LinearProgressIndicator(progress = uploadProgress / 100, modifier = Modifier.fillMaxWidth())
+                    Text(text = "Uploading... ${uploadProgress.toInt()}%")
                 }
             }
         }
     )
 }
 
-fun savePostToFirestore(mediaUrl: String, firestore: FirebaseFirestore, userId: String) {
+// Function to save post data to Firestore with description and media URL
+fun savePostToFirestore(mediaUrl: String, description: String, firestore: FirebaseFirestore, userId: String) {
     val postData = mapOf(
         "userId" to userId,
         "mediaUrl" to mediaUrl,
+        "description" to description,
         "timestamp" to System.currentTimeMillis()
     )
 
