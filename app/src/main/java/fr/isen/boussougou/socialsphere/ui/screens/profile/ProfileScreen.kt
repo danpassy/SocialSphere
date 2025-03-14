@@ -21,10 +21,6 @@ import coil.compose.AsyncImage
 import androidx.navigation.NavController
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.auth.FirebaseAuth
-import androidx.compose.runtime.*
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,29 +31,7 @@ fun ProfileScreen(
     userDescription: String,
     profileImageUrl: String?
 ) {
-    val firestore = FirebaseFirestore.getInstance()
-    val auth = FirebaseAuth.getInstance()
-    val currentUserId = auth.currentUser?.uid ?: ""
-
-    // State variables for followers and following counts
-    var followersCount by remember { mutableStateOf(0) }
-    var followingCount by remember { mutableStateOf(0) }
-
-    // Fetch followers and following counts from Firestore
-    LaunchedEffect(currentUserId) {
-        if (currentUserId.isNotEmpty()) {
-            firestore.collection("users").document(currentUserId).get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        followersCount = document.getLong("followersCount")?.toInt() ?: 0
-                        followingCount = document.getLong("followingCount")?.toInt() ?: 0
-                    }
-                }
-                .addOnFailureListener {
-                    // Handle errors if necessary
-                }
-        }
-    }
+    // Scaffold pour l'interface utilisateur
     Scaffold(
         topBar = {
             TopAppBar(
@@ -101,34 +75,28 @@ fun ProfileScreen(
                         )
                     }
                 }
-
                 Spacer(modifier = Modifier.width(16.dp))
-
-                // Statistiques (Posts, Followers, Following)
                 Row(
                     modifier = Modifier.weight(1f),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     ProfileStat(title = "Posts", count = "0")
-                    ProfileStat(title = "Followers", count = followersCount.toString())
-                    ProfileStat(title = "Following", count = followingCount.toString())
+                    ProfileStat(title = "Followers", count = "0")
+                    ProfileStat(title = "Following", count = "1")
                 }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // User information section (Name, Job, Description)
+            // Informations utilisateur
             Text(userName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Text(userJob, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
-
             Spacer(modifier = Modifier.height(4.dp))
-
-            // Description de l'utilisateur
             Text(userDescription, style = MaterialTheme.typography.bodyMedium)
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Boutons d'action principaux (Modifier le profil et Partager le profil)
+            // Boutons principaux
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -158,14 +126,14 @@ fun ProfileScreen(
                 SmallActionButton(
                     text = "Add Post",
                     icon = Icons.Default.Add,
-                    onClick = { /* TODO: Implement add post functionality */ },
+                    onClick = { navController.navigate("post_screen") },
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 SmallActionButton(
                     text = "Add Story",
                     icon = Icons.Default.Add,
-                    onClick = { /* TODO: Implement add story functionality */ },
+                    onClick = { navController.navigate("add_story_screen") },
                     modifier = Modifier.weight(1f)
                 )
             }
