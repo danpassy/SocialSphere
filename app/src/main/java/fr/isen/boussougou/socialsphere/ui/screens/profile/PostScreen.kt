@@ -160,18 +160,47 @@ fun PostScreen(navController: NavHostController) {
     )
 }
 
-// Function to save post data to Firestore with description and media URL
-fun savePostToFirestore(mediaUrl: String, description: String, firestore: FirebaseFirestore, userId: String) {
-    val postData = mapOf(
-        "userId" to userId,
-        "mediaUrl" to mediaUrl,
-        "description" to description,
-        "timestamp" to System.currentTimeMillis()
-    )
 
-    firestore.collection("posts").add(postData).addOnSuccessListener {
-        println("Post saved successfully.")
-    }.addOnFailureListener { e ->
-        println("Error saving post: $e")
-    }
+fun savePostToFirestore(
+    mediaUrl: String,
+    description: String,
+    firestore: FirebaseFirestore,
+    userId: String
+) {
+    firestore.collection("users").document(userId).get()
+        .addOnSuccessListener { document ->
+            if (document.exists()) {
+                val userName = document.getString("name") ?: "Unknown"
+                val userProfileImageUrl = document.getString("profile_image_url") ?: ""
+
+                val postData = mapOf(
+                    "userId" to userId,
+                    "userName" to userName,
+                    "userProfileImageUrl" to userProfileImageUrl,
+                    "mediaUrl" to mediaUrl,
+                    "description" to description,
+                    "likesCount" to 0,
+                    "likedBy" to emptyList<String>(),
+                    "commentsCount" to 0,
+                    "timestamp" to System.currentTimeMillis()
+                )
+
+                firestore.collection("posts").add(postData)
+                    .addOnSuccessListener {
+                        println("Post saved successfully.")
+                    }
+                    .addOnFailureListener { e ->
+                        println("Error saving post: $e")
+                    }
+            } else {
+                println("User document does not exist.")
+            }
+        }
+        .addOnFailureListener { e ->
+            println("Error fetching user data: $e")
+        }
 }
+
+
+
+
