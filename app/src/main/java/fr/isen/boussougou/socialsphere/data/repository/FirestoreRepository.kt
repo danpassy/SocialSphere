@@ -151,5 +151,30 @@ class FirestoreRepository(
             onResult(false)
         }
     }
+    fun handleLikeClick(postId: String, userId: String, firestore: FirebaseFirestore) {
+        val postRef = firestore.collection("posts").document(postId)
+        firestore.runTransaction { transaction ->
+            val snapshot = transaction.get(postRef)
+            val likesCount =
+                snapshot.getLong("likesCount")?.toInt() ?: 0
+            val likedBy =
+                snapshot.get("likedBy") as? List<String> ?: emptyList()
+
+            if (userId in likedBy) {
+                transaction.update(postRef, "likesCount", likesCount - 1)
+                transaction.update(postRef, "likedBy", likedBy - userId)
+            } else {
+                transaction.update(postRef, "likesCount", likesCount + 1)
+                transaction.update(postRef, "likedBy", likedBy + userId)
+            }
+        }
+    }
+
+    fun handleCommentSubmit(postId: String, comment: String, userId: String, firestore: FirebaseFirestore) {
+        val commentData =
+            mapOf("userId" to userId, "comment" to comment, "timestamp" to System.currentTimeMillis())
+        firestore.collection("posts").document(postId).collection("comments").add(commentData)
+    }
+
 
 }
