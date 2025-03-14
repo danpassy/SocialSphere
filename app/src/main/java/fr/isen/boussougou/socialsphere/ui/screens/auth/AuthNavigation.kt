@@ -25,7 +25,7 @@ import fr.isen.boussougou.socialsphere.ui.screens.profile.ProNavigation
  * @param authRepository Instance de AuthRepository pour gérer la logique d'authentification.
  */
 @Composable
-fun AuthNavigation(modifier: Modifier = Modifier, authRepository: AuthRepository) {
+fun AuthNavigation(modifier: Modifier = Modifier, authRepository: AuthRepository, onLogout: () -> Unit) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "login", modifier = modifier) {
@@ -86,7 +86,7 @@ fun AuthNavigation(modifier: Modifier = Modifier, authRepository: AuthRepository
 
         // Ajout explicite de cette route pour résoudre le crash :
         composable("home") {
-            ProNavigation()
+            ProNavigation(onLogout = onLogout)
         }
     }
 }
