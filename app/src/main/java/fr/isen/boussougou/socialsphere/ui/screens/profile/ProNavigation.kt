@@ -109,6 +109,12 @@ fun ProNavigation(modifier: Modifier = Modifier) {
                 val userId = backStackEntry.arguments?.getString("userId")
                 ExternalProfileScreen(userId)
             }
+            /**
+             * Post screen for creating new posts (images or videos).
+             */
+            composable("post_screen") {
+                PostScreen(navController)
+            }
         }
     }
 }

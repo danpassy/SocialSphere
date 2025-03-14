@@ -141,7 +141,7 @@ fun HomeScreen(navController: NavHostController) {
                     )
                 }
                 // Icône "+" à gauche pour créer une nouvelle publication.
-                IconButton(onClick={ navController.navigate("PostScreen") }) {
+                IconButton(onClick={ navController.navigate("post_screen") }) {
                     Icon(
                         Icons.Default.Add,
                         contentDescription="Nouvelle publication",
