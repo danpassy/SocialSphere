@@ -1,6 +1,8 @@
 package fr.isen.boussougou.socialsphere.ui.screens.profile
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -9,15 +11,18 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import fr.isen.boussougou.socialsphere.models.Post
 import androidx.navigation.NavController
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,7 +36,30 @@ fun ProfileScreen(
     userDescription: String,
     profileImageUrl: String?
 ) {
-    // Scaffold pour l'interface utilisateur
+    val firestore = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
+    val currentUserId = auth.currentUser?.uid ?: ""
+
+    var posts by remember { mutableStateOf<List<Post>>(emptyList()) }
+
+    // Charger les publications de l'utilisateur connecté depuis Firestore.
+    LaunchedEffect(currentUserId) {
+        firestore.collection("posts")
+            .whereEqualTo("userId", currentUserId)
+            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    println("Error fetching posts: $error")
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    posts = snapshot.documents.mapNotNull { doc ->
+                        doc.toObject(Post::class.java)?.copy(id = doc.id)
+                    }
+                }
+            }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -50,7 +78,7 @@ fun ProfileScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
-            // En-tête du profil avec photo et statistiques
+            // En-tête du profil avec photo et statistiques.
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -80,7 +108,7 @@ fun ProfileScreen(
                     modifier = Modifier.weight(1f),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    ProfileStat(title = "Posts", count = "0")
+                    ProfileStat(title = "Posts", count = posts.size.toString())
                     ProfileStat(title = "Followers", count = "0")
                     ProfileStat(title = "Following", count = "1")
                 }
@@ -88,7 +116,7 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Informations utilisateur
+            // Informations utilisateur.
             Text(userName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Text(userJob, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
             Spacer(modifier = Modifier.height(4.dp))
@@ -96,7 +124,7 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Boutons principaux
+            // Boutons principaux.
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -118,26 +146,27 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Boutons pour ajouter un post et une story
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                SmallActionButton(
-                    text = "Add Post",
-                    icon = Icons.Default.Add,
-                    onClick = { navController.navigate("post_screen") },
-                    modifier = Modifier.weight(1f)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                SmallActionButton(
-                    text = "Add Story",
-                    icon = Icons.Default.Add,
-                    onClick = { navController.navigate("add_story_screen") },
-                    modifier = Modifier.weight(1f)
-                )
+            // Affichage des publications de l'utilisateur.
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                items(posts, key={ it.id ?: "" }) { post ->
+                    PostItem(post)
+                }
             }
         }
+    }
+}
+
+@Composable
+fun PostItem(post: Post) {
+    Column(modifier=Modifier.fillMaxWidth().padding(16.dp)) {
+        AsyncImage(
+            model=post.mediaUrl,
+            contentDescription="Post Media",
+            modifier=Modifier.fillMaxWidth().height(300.dp),
+            contentScale=ContentScale.Crop
+        )
+        Spacer(modifier=Modifier.height(8.dp))
+        Text(post.description ?: "", style=MaterialTheme.typography.bodyMedium)
     }
 }
 
@@ -162,15 +191,3 @@ fun ActionButton(text: String, icon: ImageVector, onClick: () -> Unit, modifier:
     }
 }
 
-@Composable
-fun SmallActionButton(text: String, icon: ImageVector, onClick: () -> Unit, modifier: Modifier=Modifier) {
-    OutlinedButton(
-        onClick=onClick,
-        modifier=modifier.height(32.dp),
-        shape=RoundedCornerShape(4.dp),
-    ) {
-        Icon(icon, contentDescription=text, modifier=Modifier.size(16.dp))
-        Spacer(modifier=Modifier.width(4.dp))
-        Text(text, style=MaterialTheme.typography.bodySmall)
-    }
-}

@@ -115,6 +115,13 @@ fun ProNavigation(modifier: Modifier = Modifier) {
             composable("post_screen") {
                 PostScreen(navController)
             }
+            composable("comment_screen/{postId}") { backStackEntry ->
+                val postId = backStackEntry.arguments?.getString("postId") ?: return@composable
+                CommentScreen(
+                    postId = postId,
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
         }
     }
 }
