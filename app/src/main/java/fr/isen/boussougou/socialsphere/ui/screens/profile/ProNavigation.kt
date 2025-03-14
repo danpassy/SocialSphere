@@ -20,24 +20,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Home
+import fr.isen.boussougou.socialsphere.ui.screens.chat.ChatScreen
 
-/**
- * Main navigation manager for user-related screens.
- * This composable displays a bottom navigation bar allowing navigation between Home, Chat, and Profile screens.
- *
- * @param modifier Modifier for applying additional customizations.
- */
 @Composable
 fun ProNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
 
-    // State variables for user data
     var userName by remember { mutableStateOf("Loading...") }
     var userJob by remember { mutableStateOf("Loading...") }
     var userDescription by remember { mutableStateOf("Loading...") }
     var profileImageUrl by remember { mutableStateOf<String?>(null) }
 
-    // Fetch user data from Firestore when ProNavigation is displayed
     val firestore = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
     val userId = auth.currentUser?.uid
@@ -69,23 +62,14 @@ fun ProNavigation(modifier: Modifier = Modifier) {
             startDestination = "home",
             modifier = modifier.padding(innerPadding)
         ) {
-            /**
-             * Main home screen displayed after the user's profile setup.
-             */
             composable("home") {
                 HomeScreen(navController)
             }
 
-            /**
-             * Chat screen allowing users to interact via instant messaging.
-             */
             composable("chat") {
-                ChatScreen()
+                ChatScreen(navController)
             }
 
-            /**
-             * Profile screen displaying the user's information dynamically fetched from Firestore.
-             */
             composable("profile") {
                 ProfileScreen(
                     navController = navController,
@@ -96,22 +80,15 @@ fun ProNavigation(modifier: Modifier = Modifier) {
                 )
             }
 
-            /**
-             * Edit Profile screen for updating user details.
-             */
             composable("profile_setup_screen") {
                 ProfileSetupScreen(navController = navController)
             }
-            /**
-             * External Profile screen for viewing other users' profiles.
-             */
+
             composable("external_profile_screen/{userId}") { backStackEntry ->
                 val userId = backStackEntry.arguments?.getString("userId")
                 ExternalProfileScreen(userId)
             }
-            /**
-             * Post screen for creating new posts (images or videos).
-             */
+
             composable("post_screen") {
                 PostScreen(navController)
             }
@@ -119,11 +96,6 @@ fun ProNavigation(modifier: Modifier = Modifier) {
     }
 }
 
-/**
- * Composable representing the bottom navigation bar allowing navigation between main screens.
- *
- * @param navController Navigation controller to manage transitions between screens.
- */
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
     val items = listOf(
@@ -151,11 +123,4 @@ fun BottomNavigationBar(navController: NavHostController) {
     }
 }
 
-/**
- * Data class representing individual items in the bottom navigation bar.
- *
- * @param route Route associated with the target screen for navigation.
- * @param icon Icon to display in the navigation bar.
- * @param label Label displayed below the icon.
- */
 data class BottomNavItem(val label: String, val icon: ImageVector, val route: String)
